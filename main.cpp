@@ -1,19 +1,30 @@
-#include <math.h>
+ï»¿#include <math.h>
+
+#ifdef _WIN32
 #include <direct.h>
+#define ch_dir _chdir
+#elif __APPLE__
+#include <unistd.h>
+#define ch_dir chdir
+#elif __linux__
+#include <unistd.h>
+#define ch_dir chdir
+#endif
+
 #include "tgaimage.h"
 
 const TGAColor green = TGAColor(0, 255, 0, 255);
 
 void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
 	bool steep = false;
-	//x£¬yÖá»¥»»£¬Ê¹Æä±ä³ÉĞ±ÂÊÔÚ0-1Ö®¼ä
+	//xï¼Œyè½´äº’æ¢ï¼Œä½¿å…¶å˜æˆæ–œç‡åœ¨0-1ä¹‹é—´
  	if (std::abs(x0 - x1) < std::abs(y0 - y1)) {
  		std::swap(x0, y0);
  		std::swap(x1, y1);
  		steep = true;
  	}
 
-	//ÖÕµãxÖµĞ¡ÓÚÆğµã£¬½»»»±äÎªbase case
+	//ç»ˆç‚¹xå€¼å°äºèµ·ç‚¹ï¼Œäº¤æ¢å˜ä¸ºbase case
  	if (x0 > x1) {
  		std::swap(x0, x1);
  		std::swap(y0, y1);
@@ -22,21 +33,21 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
 	int dx = x1 - x0;
 	int dy = y1 - y0;
 
-	//Ö±ÏßĞ±ÂÊ
+	//ç›´çº¿æ–œç‡
 	float k = std::abs(dy / float(dx));
 
 	float d = 0;
 	int y = y0;
 
 	for (int x = x0; x <= x1; x++) {
-		//»­³öÏñËØµã
+		//ç”»å‡ºåƒç´ ç‚¹
 		if (steep)
 			image.set(y, x, color);
 		else
 			image.set(x, y, color);
-		//¼ÓÉÏÖ±ÏßĞ±ÂÊ
+		//åŠ ä¸Šç›´çº¿æ–œç‡
 		d += k;
-		//Ñ¡ÔñÉÏ±ßµÄÏñËØ
+		//é€‰æ‹©ä¸Šè¾¹çš„åƒç´ 
 		if (d > 0.5f) {
 			y += (y1 > y0 ? 1 : -1);
 			d -= 1.0f;
@@ -46,7 +57,7 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
 
 int main(int argc, char** argv) {
 	std::string dir = CWD;
-	(void)_chdir((dir + "/bin").c_str());
+	(void)ch_dir((dir + "/bin").c_str());
 
     TGAImage image(100, 100, TGAImage::RGB);
 	line(50, 50, 80, 90, image, green);
